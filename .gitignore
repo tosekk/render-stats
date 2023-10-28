@@ -1,0 +1,6 @@
+# Copyright © Zhandos Kadyrkulov 2023 | All Rights Reserved
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
