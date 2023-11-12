@@ -1,4 +1,15 @@
-# Copyright © Zhandos Kadyrkulov 2023 | All Rights Reserved
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import platform
 
@@ -8,6 +19,19 @@ from bpy.types import Panel
 
 
 from ..utils import funcs
+
+
+COLORS = [
+    (0.55, 0.79, 0.9, 1),
+    (0.13, 0.62, 0.74, 1),
+    (0.008, 0.19, 0.28, 1),
+    (1, 0.72, 0.01, 1),
+    (0.98, 0.52, 0, 1)
+]
+
+_lights_handler = None
+_objects_handler = None
+_ray_handler = None
 
 
 class RenderStats:
@@ -23,12 +47,16 @@ class IMAGE_PT_RenderStatsMainPanel(Panel, RenderStats):
 
     @classmethod
     def poll(cls, context):
+        images = bpy.data.images
         render_engine = context.scene.render.engine
-        return render_engine == "CYCLES"
+        return render_engine == "CYCLES" and \
+            images['Render Result'].has_data
 
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+
+        layout.operator("render.analyzer")
 
 
 class IMAGE_PT_RenderStatsGeneral(Panel, RenderStats):
@@ -82,6 +110,7 @@ class IMAGE_PT_RenderStatsObjects(Panel, RenderStats):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+        region = context.region
         data = bpy.data
 
         meshes = len(data.meshes)
@@ -104,6 +133,11 @@ class IMAGE_PT_RenderStatsObjects(Panel, RenderStats):
         lights_col = second_row.column()
         funcs.create_labels(lights_col, "Lights", lights)
 
+        objects = [polygons, meshes, materials, lights]
+        data = funcs.create_data_for_viz(objects, COLORS)
+
+        funcs.manage_handler(_objects_handler, scene, region, data)
+
 
 class IMAGE_PT_RenderStatsLights(Panel, RenderStats):
     """Render Stats: Light Types"""
@@ -113,6 +147,7 @@ class IMAGE_PT_RenderStatsLights(Panel, RenderStats):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+        region = context.region
         lights = bpy.data.lights
 
         area = funcs.get_light_count_by_type(lights, "Area")
@@ -130,6 +165,11 @@ class IMAGE_PT_RenderStatsLights(Panel, RenderStats):
         spot_col = second_row.column()
         funcs.create_labels(spot_col, "Spot", spot)
 
+        lights = [area, point, spot]
+        data = funcs.create_data_for_viz(lights, COLORS)
+
+        funcs.manage_handler(_lights_handler, scene, region, data)
+
 
 class IMAGE_PT_RenderStatsTime(Panel, RenderStats):
     """Render Stats: Time Spent"""
@@ -142,8 +182,8 @@ class IMAGE_PT_RenderStatsTime(Panel, RenderStats):
         cycles = scene.cycles
 
         row = layout.row()
-        col = row.column()
-        funcs.create_labels(col, "Dicing", cycles.dicing_rate)
+        dicing_col = row.column()
+        funcs.create_labels(dicing_col, "Dicing", cycles.dicing_rate)
 
 
 class IMAGE_PT_RenderStatsRays(Panel, RenderStats):
@@ -152,8 +192,11 @@ class IMAGE_PT_RenderStatsRays(Panel, RenderStats):
     bl_parent_id = "IMAGE_PT_RenderStatsMainPanel"
 
     def draw(self, context):
+        global _ray_handler
+
         layout = self.layout
         scene = context.scene
+        region = context.region
         cycles = scene.cycles
 
         first_row = layout.row()
@@ -170,6 +213,11 @@ class IMAGE_PT_RenderStatsRays(Panel, RenderStats):
         transmission_col = second_row.column()
         funcs.create_labels(transmission_col, 
                             "Transmission", cycles.transmission_bounces)
+        
+        rays = [cycles.ao_bounces, cycles.diffuse_bounces, cycles.glossy_bounces, cycles.transmission_bounces]
+        data = funcs.create_data_for_viz(rays, COLORS)
+
+        funcs.manage_handler(_ray_handler, scene, region, data)
 
 
 class IMAGE_PT_RenderStatsHostData(Panel, RenderStats):
@@ -219,3 +267,5 @@ def register_panels():
 def unregister_panels():
     for cls in classes:
         bpy.utils.unregister_class(cls)
+    
+    bpy.types.SpaceImageEditor.draw_handler_remove(custom.draw_pie_chart, "UI")
