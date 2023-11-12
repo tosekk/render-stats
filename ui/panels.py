@@ -133,10 +133,15 @@ class IMAGE_PT_RenderStatsObjects(Panel, RenderStats):
         lights_col = second_row.column()
         funcs.create_labels(lights_col, "Lights", lights)
 
-        objects = [polygons, meshes, materials, lights]
+        third_row = layout.row()
+        empty_col = third_row.column()
+        empty_col.label(text="")
+        empty_col.label(text="")
+
+        objects = [meshes, materials, lights]
         data = funcs.create_data_for_viz(objects, COLORS)
 
-        funcs.manage_handler(_objects_handler, scene, region, data)
+        funcs.manage_handler(_objects_handler, scene, region.width / 2 - 140, (region.height / 2) + 170, data)
 
 
 class IMAGE_PT_RenderStatsLights(Panel, RenderStats):
@@ -168,7 +173,7 @@ class IMAGE_PT_RenderStatsLights(Panel, RenderStats):
         lights = [area, point, spot]
         data = funcs.create_data_for_viz(lights, COLORS)
 
-        funcs.manage_handler(_lights_handler, scene, region, data)
+        funcs.manage_handler(_lights_handler, scene, region.width / 2 + 30, region.height / 2 - 90, data)
 
 
 class IMAGE_PT_RenderStatsTime(Panel, RenderStats):
@@ -214,10 +219,15 @@ class IMAGE_PT_RenderStatsRays(Panel, RenderStats):
         funcs.create_labels(transmission_col, 
                             "Transmission", cycles.transmission_bounces)
         
+        third_row = layout.row()
+        empty_col = third_row.column()
+        empty_col.label(text="")
+        empty_col.label(text="")
+        
         rays = [cycles.ao_bounces, cycles.diffuse_bounces, cycles.glossy_bounces, cycles.transmission_bounces]
         data = funcs.create_data_for_viz(rays, COLORS)
 
-        funcs.manage_handler(_ray_handler, scene, region, data)
+        funcs.manage_handler(_ray_handler, scene, region.width / 2 - 140, (region.height / 2) - 610, data)
 
 
 class IMAGE_PT_RenderStatsHostData(Panel, RenderStats):

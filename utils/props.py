@@ -42,13 +42,13 @@ class RenderStatsProperties(PropertyGroup):
     )
 
 
-def register_props():
+def register_props() -> None:
     bpy.utils.register_class(RenderStatsProperties)
 
     bpy.types.Scene.render_stats = PointerProperty(type=RenderStatsProperties)
 
 
-def unregister_props():
+def unregister_props() -> None:
     bpy.utils.unregister_class(RenderStatsProperties)
 
     del bpy.types.Scene.render_stats
