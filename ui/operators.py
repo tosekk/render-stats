@@ -32,9 +32,7 @@ class IMAGE_OT_OpenAnalyzer(Operator):
         server.bind(("localhost", 55645))
         server.listen(1)
 
-        curr_path = os.path.abspath(__file__)
-        curr_dir = "/".join(curr_path.split("/")[:-2])
-        analyzer_dir = curr_dir + "/ext_gui/dist/"
+        analyzer_dir = bpy.utils.user_resource("SCRIPTS", path="addons/render-stats/ext_gui/dist/")
 
         if sys.platform == "win32":
             analyzer_path = analyzer_dir + "analyzer.exe"
@@ -43,20 +41,11 @@ class IMAGE_OT_OpenAnalyzer(Operator):
 
         subprocess.run([analyzer_path])
 
-        # event_type = "Data Updated"
-        # render_data = {"1": ""}
-        # message = {"type": event_type, "data": render_data}
-        # json_message = json.dumps(message)
-
-        # connection, _ = server.accept()
-        # connection.send(json_message.encode())
-        # connection.close()
-
         return {"FINISHED"}
 
 
 classes = [
-    IMAGE_OT_OpenAnalyzer
+    IMAGE_OT_OpenAnalyzer,
 ]
 
 

@@ -22,7 +22,11 @@ bl_info = {
 }
 
 
+import bpy
+
+
 from . import __reload__
+from . import prefs
 from . import ui
 from . import utils
 
@@ -31,17 +35,19 @@ __reload__.reload_modules()
 
 
 def register():
+    prefs.register_preferences()
     utils.register_utils()
     ui.register_ui()
 
-    # utils.funcs.patch_panels()
+    bpy.app.handlers.frame_change_pre.append(utils.funcs.track_ui_changes)
 
 
 def unregister():
-    # utils.funcs.unpatch_panels()
+    bpy.app.handlers.frame_change_pre.remove(utils.funcs.track_ui_changes)
 
     ui.unregister_ui()
     utils.unregister_utils()
+    prefs.unregister_preferences()
 
 
 if __name__ == "__main__":

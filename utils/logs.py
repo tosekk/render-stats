@@ -11,15 +11,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from . import charts
-from . import funcs
-from . import logs
-from . import props
+import bpy
 
 
-def register_utils():
-    props.register_props()
-
-
-def unregister_utils():
-    props.unregister_props()
+def write_to_log(data: list) -> None:
+    log_name = bpy.context.preferences.addons["render-stats"].preferences.log_name
+    log_path = bpy.utils.user_resource("SCRIPTS", path="addons/render-stats/logs") + f"/{log_name}.txt"
+    
+    with open(log_path, "a+") as file:
+        file.write("".join(data))

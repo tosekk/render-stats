@@ -109,7 +109,7 @@ def create_data_for_viz(input: list , colors: list) -> list:
     return data
 
 
-def manage_handler(handler, scene: bpy.types.Scene, x: int, y: int, data: list) -> None:
+def manage_handler(handler, scene: bpy.types.Scene, x: int, y: int, data: list, is_pie_chart: bool) -> None:
     """
     Manage specified draw handler.
 
@@ -127,66 +127,27 @@ def manage_handler(handler, scene: bpy.types.Scene, x: int, y: int, data: list) 
             bpy.types.SpaceImageEditor.draw_handler_remove(handler, "UI")
             scene.render_stats.rays_panel_visible = False
             handler = None
-        
-    handler = bpy.types.SpaceImageEditor.draw_handler_add(charts.draw_pie_chart, (x, y, 40, data), "UI", "POST_PIXEL")
-
-
-def track_chart_panels(self: bpy.types.Panel, context: bpy.types.Context) -> None:
-    """
-    Track chart panels' visibility.
-
-    A function that tracks visibility of panels with charts.
-
-    Parameters:
-    self (bpy.types.Panel): Panel instance
-    context (bpy.types.Context): Context of the panel
-    """
-
-    if self.bl_label == "Ray Types":
-        context.scene.render_stats.ray_panel_visible = True
-    elif self.bl_label == "Light Types":
-        context.scene.render_stats.lights_panel_visible = True
-    elif self.bl_label == "Object Counts":
-        context.scene.render_stats.objects_panel_visible = True
+    
+    if is_pie_chart:
+        handler = bpy.types.SpaceImageEditor.draw_handler_add(charts.draw_pie_chart, (x, y, 40, data), "UI", "POST_PIXEL")
     else:
-        context.scene.render_stats.ray_panel_visible = False
-        context.scene.render_stats.lights_panel_visible = False
-        context.scene.render_stats.objects_panel_visible = False
+        handler = bpy.types.SpaceImageEditor.draw_handler_add(charts.draw_donut_chart, (x, y, 25, 40, data), "UI", "POST_PIXEL")
 
 
-def patch_panels() -> None:
-    """
-    Monkey patch panels.
-
-    A function that monkey patchs panels in the Image Editor's UI sidebar.
-    """
-
-    global original_draw
-    global patched_panels
-    patched_panels = []
-
+def track_ui_changes(scene: bpy.types.Scene) -> None:
+    print("Tracking changes")
     try:
         for panel in bpy.types.Panel.__subclasses__():
             if panel.bl_space_type == "IMAGE_EDITOR" and panel.bl_region_type == "UI":
-                original_draw = panel.draw
-                
-                def draw(self, context):
-                    track_chart_panels(self, context)
-                    original_draw(self, context)
-                
-                panel.draw = draw
-                patched_panels.append(panel)
+                if panel.bl_label == "Ray Types":
+                    bpy.context.scene.render_stats.ray_panel_visible = True
+                elif panel.bl_label == "Light Types":
+                    bpy.context.scene.render_stats.lights_panel_visible = True
+                elif panel.bl_label == "Object Counts":
+                    bpy.context.scene.render_stats.objects_panel_visible = True
+                else:
+                    bpy.context.scene.render_stats.ray_panel_visible = False
+                    bpy.context.scene.render_stats.lights_panel_visible = False
+                    bpy.context.scene.render_stats.objects_panel_visible = False
     except AttributeError:
         print("Not a UI panel of Image Editor")
-
-
-def unpatch_panels() -> None:
-    """
-    Unpatch panels.
-
-    Return the panels to their original state before monkey patch.
-    """
-
-    for panel in patched_panels:
-        panel.draw = original_draw
-        patched_panels.remove(panel)

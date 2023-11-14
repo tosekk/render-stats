@@ -20,6 +20,7 @@ import bpy
 
 from . import ui
 from . import utils
+from . import prefs
 
 
 def reload_modules():
@@ -27,5 +28,6 @@ def reload_modules():
         return
     
     reload(sys.modules[__name__])
+    reload(prefs)
     reload(utils)
     reload(ui)

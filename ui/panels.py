@@ -56,7 +56,8 @@ class IMAGE_PT_RenderStatsMainPanel(Panel, RenderStats):
         layout = self.layout
         scene = context.scene
 
-        layout.operator("render.analyzer")
+        # first_row = layout.row()
+        # first_row.operator("render.analyzer")
 
 
 class IMAGE_PT_RenderStatsGeneral(Panel, RenderStats):
@@ -112,6 +113,7 @@ class IMAGE_PT_RenderStatsObjects(Panel, RenderStats):
         scene = context.scene
         region = context.region
         data = bpy.data
+        prefs = context.preferences.addons["render-stats"].preferences
 
         meshes = len(data.meshes)
         lights = len(data.lights)
@@ -141,7 +143,8 @@ class IMAGE_PT_RenderStatsObjects(Panel, RenderStats):
         objects = [meshes, materials, lights]
         data = funcs.create_data_for_viz(objects, COLORS)
 
-        funcs.manage_handler(_objects_handler, scene, region.width / 2 - 140, (region.height / 2) + 170, data)
+        funcs.manage_handler(_objects_handler, scene, region.width / 2 - 140, 
+                             (region.height / 2) + 170, data, prefs.pie_chart)
 
 
 class IMAGE_PT_RenderStatsLights(Panel, RenderStats):
@@ -154,6 +157,7 @@ class IMAGE_PT_RenderStatsLights(Panel, RenderStats):
         scene = context.scene
         region = context.region
         lights = bpy.data.lights
+        prefs = context.preferences.addons["render-stats"].preferences
 
         area = funcs.get_light_count_by_type(lights, "Area")
         point = funcs.get_light_count_by_type(lights, "Point")
@@ -173,7 +177,8 @@ class IMAGE_PT_RenderStatsLights(Panel, RenderStats):
         lights = [area, point, spot]
         data = funcs.create_data_for_viz(lights, COLORS)
 
-        funcs.manage_handler(_lights_handler, scene, region.width / 2 + 30, region.height / 2 - 90, data)
+        funcs.manage_handler(_lights_handler, scene, region.width / 2 + 30, 
+                             region.height / 2 - 90, data, prefs.pie_chart)
 
 
 class IMAGE_PT_RenderStatsTime(Panel, RenderStats):
@@ -203,6 +208,7 @@ class IMAGE_PT_RenderStatsRays(Panel, RenderStats):
         scene = context.scene
         region = context.region
         cycles = scene.cycles
+        prefs = context.preferences.addons["render-stats"].preferences
 
         first_row = layout.row()
         ao_col = first_row.column()
@@ -227,7 +233,8 @@ class IMAGE_PT_RenderStatsRays(Panel, RenderStats):
         rays = [cycles.ao_bounces, cycles.diffuse_bounces, cycles.glossy_bounces, cycles.transmission_bounces]
         data = funcs.create_data_for_viz(rays, COLORS)
 
-        funcs.manage_handler(_ray_handler, scene, region.width / 2 - 140, (region.height / 2) - 610, data)
+        funcs.manage_handler(_ray_handler, scene, region.width / 2 - 140, 
+                             (region.height / 2) - 610, data, prefs.pie_chart)
 
 
 class IMAGE_PT_RenderStatsHostData(Panel, RenderStats):

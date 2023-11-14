@@ -35,6 +35,9 @@ Inspired by the render statistics in Houdini 20.
     4. GPU
 
 ## TO-DO
-- [ ] Custom pie charts
+- [x] Custom pie charts
+- [ ] Localize custom charts by panels - currently display in the UI sidebar in different tabs as well, probably gonna use template_preview()
 - [ ] Volume rays
 - [ ] Curves
+- [ ] Web-based dashboard
+- [ ] Logging render statistics
